@@ -1,0 +1,100 @@
+<!-- 首页：AI 对话记账 -->
+<view class="container">
+
+  <!-- 预算进度条 -->
+  <view class="card budget-card">
+    <view class="budget-header">
+      <text class="budget-title">本月预算</text>
+      <text class="budget-link" bindtap="goSetBudget">设置</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill {{budgetRate >= 80 ? 'danger' : ''}}" style="width: {{budgetRate}}%"></view>
+    </view>
+    <view class="budget-text">
+      <text>已花 ¥{{spent}}</text>
+      <text class="{{budgetRate >= 80 ? 'text-danger' : 'text-muted'}}">预算 ¥{{budget}}</text>
+    </view>
+  </view>
+
+  <!-- 默认账户标签 -->
+  <view class="account-tag" wx:if="{{lastAccount}}" bindtap="goAccounts">
+    <text class="text-muted">默认：</text>
+    <text class="badge-{{lastAccountType}}">{{lastAccount}}</text>
+  </view>
+
+  <!-- AI 输入框 -->
+  <view class="card input-card">
+    <textarea
+      class="ai-input"
+      placeholder="记一笔：午饭32，地铁4块，用微信"
+      value="{{inputText}}"
+      bindinput="onInput"
+      auto-height
+      confirm-type="send"
+      bindconfirm="onSend"
+      maxlength="500"
+    />
+    <view class="input-footer">
+      <button class="btn-primary send-btn" bindtap="onSend" loading="{{loading}}">
+        {{loading ? '解析中...' : '记一笔'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 确认卡片（AI解析后展示） -->
+  <block wx:for="{{cards}}" wx:key="index">
+    <view class="card confirm-card">
+      <view class="card-row">
+        <text class="card-desc">{{item.description}}</text>
+        <text class="card-amount {{item.type === 'income' ? 'income' : ''}}">
+          {{item.type === 'income' ? '+' : '-'}}¥{{item.amount}}
+        </text>
+      </view>
+      <view class="card-meta">
+        <!-- 分类 -->
+        <picker mode="selector" range="{{categories}}" range-key="name" value="{{item.categoryIndex}}" bindchange="onCategoryChange" data-index="{{index}}">
+          <text class="tag tag-category">{{item.category}}</text>
+        </picker>
+        <!-- 账户 -->
+        <picker mode="selector" range="{{accounts}}" range-key="name" value="{{item.accountIndex}}" bindchange="onAccountChange" data-index="{{index}}">
+          <text class="tag tag-account">{{item.account}}</text>
+        </picker>
+        <!-- 日期 -->
+        <picker mode="date" value="{{item.date}}" bindchange="onDateChange" data-index="{{index}}">
+          <text class="tag tag-date">{{item.date}}</text>
+        </picker>
+        <text class="tag {{item.type === 'income' ? 'tag-income' : 'tag-expense'}}">{{item.type === 'income' ? '收入' : '支出'}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 一键入账 -->
+  <view class="btn-primary confirm-all" wx:if="{{cards.length}}" bindtap="onConfirm">
+    一键入账（{{cards.length}}条）
+  </view>
+
+  <!-- 最近记录 -->
+  <view class="section-title">最近记录</view>
+  <block wx:for="{{recentRecords}}" wx:key="_id">
+    <view class="card record-card">
+      <view class="card-row">
+        <view>
+          <text class="record-desc">{{item.description}}</text>
+          <text class="record-account badge-{{item.accountType}}">{{item.accountName}}</text>
+        </view>
+        <text class="card-amount {{item.type === 'income' ? 'income' : ''}}">
+          {{item.type === 'income' ? '+' : '-'}}¥{{item.amount}}
+        </text>
+      </view>
+      <view class="record-meta">
+        <text class="text-muted">{{item.category}}</text>
+        <text class="text-muted">{{item.date}}</text>
+      </view>
+    </view>
+  </block>
+
+  <view class="text-muted empty-hint" wx:if="{{recentRecords.length === 0}}">
+    还没有记录，在上面说句话开始记账吧
+  </view>
+
+</view>

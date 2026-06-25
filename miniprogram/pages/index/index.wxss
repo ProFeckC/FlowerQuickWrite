@@ -1,0 +1,42 @@
+.budget-card { padding: 24rpx 32rpx; }
+.budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.budget-title { font-size: 30rpx; font-weight: 500; }
+.budget-link { color: #D85A30; font-size: 26rpx; }
+
+.progress-bar { height: 12rpx; background: #eee; border-radius: 6rpx; overflow: hidden; margin-bottom: 12rpx; }
+.progress-fill { height: 100%; background: #D85A30; border-radius: 6rpx; transition: width 0.3s; }
+.progress-fill.danger { background: #E24B4A; }
+
+.budget-text { display: flex; justify-content: space-between; font-size: 24rpx; }
+
+.account-tag { padding: 16rpx 32rpx; font-size: 24rpx; }
+
+.input-card { padding: 24rpx; }
+.ai-input { width: 100%; min-height: 80rpx; font-size: 30rpx; line-height: 1.5; }
+.input-footer { display: flex; justify-content: flex-end; margin-top: 16rpx; }
+.send-btn { width: 180rpx; height: 72rpx; line-height: 72rpx; font-size: 28rpx; padding: 0; }
+
+.confirm-card { padding: 24rpx; }
+.card-row { display: flex; justify-content: space-between; align-items: center; }
+.card-desc { font-size: 30rpx; flex: 1; }
+.card-amount { font-size: 32rpx; font-weight: 500; color: #E24B4A; }
+.card-amount.income { color: #1D9E75; }
+
+.card-meta { display: flex; gap: 12rpx; margin-top: 16rpx; flex-wrap: wrap; }
+.tag { padding: 6rpx 16rpx; border-radius: 8rpx; font-size: 22rpx; }
+.tag-category { background: #FAEEDA; color: #854F0B; }
+.tag-account { background: #E6F1FB; color: #0C447C; }
+.tag-date { background: #F1EFE8; color: #5F5E5A; }
+.tag-expense { background: #FCEBEB; color: #A32D2D; }
+.tag-income { background: #EAF3DE; color: #3B6D11; }
+
+.confirm-all { margin: 32rpx 0; }
+
+.section-title { font-size: 28rpx; font-weight: 500; color: #888; padding: 32rpx 32rpx 16rpx; }
+
+.record-card { padding: 24rpx; }
+.record-desc { font-size: 28rpx; display: block; }
+.record-account { display: inline-block; margin-top: 8rpx; }
+.record-meta { display: flex; gap: 16rpx; margin-top: 12rpx; }
+
+.empty-hint { text-align: center; padding: 80rpx 0; }

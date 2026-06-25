@@ -1,0 +1,58 @@
+<!-- 账户管理页 -->
+<view class="container">
+
+  <view class="section-title">个人账户</view>
+  <block wx:for="{{personalAccounts}}" wx:key="_id">
+    <view class="card account-card">
+      <view class="card-row">
+        <view>
+          <text class="account-name">{{item.name}}</text>
+          <text class="badge-personal">个人</text>
+        </view>
+        <text class="account-balance">¥{{item.balance}}</text>
+      </view>
+      <view class="card-meta">
+        <text class="text-muted">期初：¥{{item.initialBalance}}</text>
+      </view>
+    </view>
+  </block>
+
+  <view class="section-title">共同账户</view>
+  <block wx:for="{{sharedAccounts}}" wx:key="_id">
+    <view class="card account-card">
+      <view class="card-row">
+        <view>
+          <text class="account-name">{{item.name}}</text>
+          <text class="badge-shared">共同</text>
+        </view>
+        <text class="account-balance">¥{{item.balance}}</text>
+      </view>
+      <view class="card-meta">
+        <text class="text-muted">期初：¥{{item.initialBalance}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 添加账户 -->
+  <view class="btn-secondary add-btn" bindtap="showAddModal">
+    + 添加账户
+  </view>
+
+  <!-- 添加弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="hideModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-title">新建账户</view>
+      <input class="modal-input" placeholder="账户名称（如：支付宝）" value="{{newName}}" bindinput="onNameInput" />
+      <input class="modal-input" placeholder="当前余额" type="digit" value="{{newBalance}}" bindinput="onBalanceInput" />
+      <view class="modal-type">
+        <view class="type-option {{newType === 'personal' ? 'active' : ''}}" bindtap="selectType" data-type="personal">个人</view>
+        <view class="type-option {{newType === 'shared' ? 'active' : ''}}" bindtap="selectType" data-type="shared">共同</view>
+      </view>
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="hideModal">取消</button>
+        <button class="btn-primary" bindtap="addAccount">确定</button>
+      </view>
+    </view>
+  </view>
+
+</view>

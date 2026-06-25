@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>花马记 - UI原型</title>
+<style>
+:root {
+  --orange: #D85A30; --orange-light: #FFF5F0;
+  --green: #1D9E75; --green-light: #EAF3DE;
+  --blue: #185FA5; --blue-light: #E6F1FB;
+  --red: #E24B4A; --red-light: #FCEBEB;
+  --bg: #F5F3F0; --card: #fff;
+  --text: #2C2C2A; --text2: #6B6B6B; --text3: #A0A0A0;
+  --radius: 16px; --radius-sm: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#E8E5E2; display:flex; justify-content:center; padding:20px; font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif; }
+.phone { width:375px; height:812px; background:var(--bg); border-radius:32px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.15); display:flex; flex-direction:column; position:relative; }
+
+/* 状态栏 & 导航 */
+.status-bar { height:32px; padding:8px 24px 0; display:flex; justify-content:space-between; font-size:11px; color:var(--text); font-weight:500; flex-shrink:0; }
+.nav { height:48px; padding:0 20px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.nav-title { font-size:18px; font-weight:700; color:var(--text); letter-spacing:0.5px; }
+.nav-title span { color:var(--orange); }
+
+/* 页面容器 */
+.pages { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.page { display:none; min-height:100%; padding-bottom:80px; }
+.page.active { display:block; }
+
+/* 底部 Tab 栏 */
+.tab-bar { position:absolute; bottom:0; left:0; right:0; height:68px; background:var(--card); border-top:0.5px solid #eee; display:flex; align-items:flex-start; padding-top:8px; z-index:10; border-radius:0 0 32px 32px; }
+.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; padding:4px 0; transition:color 0.2s; }
+.tab-item .icon { font-size:22px; line-height:1; }
+.tab-item .label { font-size:10px; font-weight:500; }
+.tab-item { color:var(--text3); }
+.tab-item.active { color:var(--orange); }
+
+/* ========== 通用 ========== */
+.card { background:var(--card); border-radius:var(--radius); padding:16px; margin:0 16px 12px; }
+.section-label { font-size:11px; color:var(--text3); padding:8px 20px 6px; letter-spacing:0.5px; text-transform:uppercase; }
+
+/* ========== 页1：记账 ========== */
+.budget-card { background:linear-gradient(135deg,#2C2C2A,#3A3A3A); color:#fff; padding:20px; border-radius:20px; margin:12px 16px 16px; }
+.budget-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.budget-label { font-size:13px; color:rgba(255,255,255,0.6); }
+.budget-period { font-size:11px; color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:10px; }
+.budget-amounts { display:flex; align-items:baseline; gap:6px; margin-bottom:14px; }
+.budget-spent { font-size:36px; font-weight:700; letter-spacing:-1px; }
+.budget-divider { color:rgba(255,255,255,0.3); font-size:18px; }
+.budget-total { font-size:15px; color:rgba(255,255,255,0.5); }
+.budget-remaining { font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px; }
+.progress-wrap { background:rgba(255,255,255,0.12); height:6px; border-radius:3px; overflow:hidden; margin-top:8px; }
+.progress-fill { height:100%; background:var(--orange); border-radius:3px; transition:width 0.5s; }
+.progress-fill.warning { background:#EF9F27; }
+.progress-fill.danger { background:var(--red); }
+
+.input-area { background:var(--card); border-radius:20px; margin:0 16px 12px; padding:4px; }
+.input-row { display:flex; align-items:center; padding:8px 12px; }
+.input-icon { width:36px; height:36px; border-radius:50%; background:var(--orange-light); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.input-field { flex:1; border:none; outline:none; font-size:15px; padding:8px 12px; color:var(--text); background:transparent; font-family:inherit; }
+.input-field::placeholder { color:#C0C0C0; }
+.input-hint { padding:4px 48px 10px; font-size:11px; color:var(--text3); }
+.input-hint span { background:#f0f0f0; padding:2px 8px; border-radius:6px; margin-right:4px; white-space:nowrap; }
+
+.account-chips { padding:0 16px 10px; display:flex; gap:8px; overflow-x:auto; }
+.account-chip { display:inline-flex; align-items:center; gap:4px; padding:6px 14px; background:var(--card); border:0.5px solid #eee; border-radius:20px; font-size:12px; color:var(--text2); cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.account-chip.active { background:var(--orange-light); border-color:var(--orange); color:var(--orange); font-weight:500; }
+.account-dot { width:7px; height:7px; border-radius:50%; background:var(--orange); }
+.account-dot.shared { background:var(--green); }
+
+.confirm-section { margin-top:4px; }
+.confirm-header { display:flex; justify-content:space-between; align-items:center; padding:0 20px 8px; }
+.confirm-header .cm-label { font-size:13px; font-weight:600; color:var(--text); }
+.confirm-header .cm-count { font-size:11px; color:var(--orange); }
+.confirm-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin:0 16px 8px; border-left:3px solid var(--orange); }
+.confirm-card.income { border-left-color:var(--green); }
+.cm-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.cm-desc { font-size:15px; font-weight:500; color:var(--text); }
+.cm-amount { font-size:18px; font-weight:700; color:var(--orange); }
+.cm-amount.income { color:var(--green); }
+.cm-meta { display:flex; gap:6px; flex-wrap:wrap; }
+.tag { font-size:11px; padding:4px 10px; border-radius:8px; font-weight:500; }
+.tag-cat { background:#FAEEDA; color:#854F0B; }
+.tag-acc { background:var(--blue-light); color:var(--blue); }
+.tag-date { background:#F1EFE8; color:#5F5E5A; }
+.tag-acc.shared { background:var(--green-light); color:#3B6D11; }
+
+.confirm-btn { display:block; width:calc(100% - 32px); margin:12px 16px 20px; padding:14px; background:var(--orange); color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.2s; }
+.confirm-btn:hover { background:#c44d28; }
+
+.record-card { padding:14px 16px; display:flex; align-items:center; gap:12px; }
+.record-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.record-icon.food { background:#FFF0E8; } .record-icon.transport { background:#E8F0FF; }
+.record-icon.shopping { background:#FFF3E8; } .record-icon.entertainment { background:#F3E8FF; }
+.record-info { flex:1; min-width:0; }
+.record-desc { font-size:14px; font-weight:500; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.record-meta { font-size:11px; color:var(--text3); margin-top:2px; }
+.record-amount { font-size:16px; font-weight:600; color:var(--orange); flex-shrink:0; }
+.record-amount.income { color:var(--green); }
+.record-badge { font-size:10px; padding:2px 6px; border-radius:6px; margin-left:4px; vertical-align:middle; }
+.record-badge.shared { background:var(--green-light); color:#3B6D11; }
+.record-badge.personal { background:var(--blue-light); color:var(--blue); }
+
+/* ========== 页2：账户 ========== */
+.acct-section { margin-bottom:8px; }
+.acct-card { padding:18px 16px; display:flex; align-items:center; gap:12px; }
+.acct-avatar { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.acct-avatar.wechat { background:#E8F5E9; color:#1B9E3B; }
+.acct-avatar.alipay { background:#E8F0FF; color:#185FA5; }
+.acct-avatar.cash { background:#FFF3E0; color:#D85A30; }
+.acct-avatar.shared-acc { background:var(--green-light); color:#3B6D11; }
+.acct-info { flex:1; }
+.acct-name { font-size:15px; font-weight:600; color:var(--text); }
+.acct-type { font-size:11px; color:var(--text3); margin-top:2px; }
+.acct-balance { text-align:right; flex-shrink:0; }
+.acct-balance .amount { font-size:18px; font-weight:700; color:var(--text); }
+.acct-balance .label { font-size:10px; color:var(--text3); }
+.acct-arrow { width:16px; color:var(--text3); flex-shrink:0; margin-left:4px; }
+
+.add-acct { display:block; width:calc(100% - 32px); margin:12px 16px; padding:14px; background:var(--card); border:1px dashed #ddd; border-radius:14px; font-size:14px; color:var(--text3); cursor:pointer; text-align:center; font-family:inherit; }
+.add-acct:hover { border-color:var(--orange); color:var(--orange); }
+
+.invite-card { background:var(--orange-light); border:0.5px solid var(--orange); border-radius:var(--radius); padding:16px; margin:0 16px 12px; text-align:center; }
+.invite-code { font-size:28px; font-weight:700; color:var(--orange); letter-spacing:4px; margin:12px 0; }
+.invite-hint { font-size:12px; color:var(--text2); }
+
+/* ========== 页3：报表 ========== */
+.report-month { display:flex; align-items:center; justify-content:center; gap:16px; padding:16px 0 12px; }
+.report-month .arrow { font-size:20px; cursor:pointer; color:var(--text3); padding:4px; }
+.report-month .month-text { font-size:18px; font-weight:700; color:var(--text); min-width:100px; text-align:center; }
+
+.summary-cards { display:flex; gap:10px; margin:0 16px 16px; }
+.summary-card { flex:1; background:var(--card); border-radius:var(--radius); padding:16px; text-align:center; }
+.summary-card .s-amount { font-size:22px; font-weight:700; color:var(--text); }
+.summary-card .s-label { font-size:11px; color:var(--text3); margin-top:4px; }
+.summary-card .s-amount.expense { color:var(--orange); }
+.summary-card .s-amount.income { color:var(--green); }
+
+.category-list { margin:0 16px; }
+.cat-row { display:flex; align-items:center; gap:12px; padding:12px 0; }
+.cat-row:not(:last-child) { border-bottom:0.5px solid #f0f0f0; }
+.cat-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.cat-name { font-size:14px; color:var(--text); flex:1; }
+.cat-amount { font-size:15px; font-weight:600; color:var(--text); }
+.cat-pct { font-size:11px; color:var(--text3); margin-left:4px; }
+.cat-bar-wrap { flex:1; height:4px; background:#f0f0f0; border-radius:2px; overflow:hidden; max-width:80px; }
+.cat-bar-fill { height:100%; border-radius:2px; }
+
+/* ========== 弹窗 ========== */
+.modal-mask { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); display:flex; align-items:flex-end; justify-content:center; z-index:100; }
+.modal-sheet { width:100%; background:var(--card); border-radius:20px 20px 0 0; padding:20px 20px 30px; animation:slideUp2 0.25s ease; }
+.modal-title { font-size:17px; font-weight:700; text-align:center; margin-bottom:20px; color:var(--text); }
+.modal-field { margin-bottom:16px; }
+.modal-field label { display:block; font-size:12px; color:var(--text3); margin-bottom:6px; }
+.modal-field input { width:100%; padding:12px 14px; border:0.5px solid #e0e0e0; border-radius:12px; font-size:15px; outline:none; font-family:inherit; color:var(--text); }
+.modal-field input:focus { border-color:var(--orange); }
+.modal-type-row { display:flex; gap:10px; }
+.modal-type-opt { flex:1; padding:12px; text-align:center; border:0.5px solid #e0e0e0; border-radius:12px; font-size:14px; cursor:pointer; color:var(--text2); }
+.modal-type-opt.active { border-color:var(--orange); color:var(--orange); background:var(--orange-light); font-weight:500; }
+.modal-btn-row { display:flex; gap:10px; margin-top:20px; }
+.modal-btn-cancel { flex:1; padding:14px; background:#f5f5f5; border:none; border-radius:14px; font-size:15px; cursor:pointer; font-family:inherit; color:var(--text2); }
+.modal-btn-ok { flex:1; padding:14px; background:var(--orange); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+
+/* 动画 */
+@keyframes slideUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.confirm-card:nth-child(2) { animation:slideUp 0.25s ease forwards; }
+.confirm-card:nth-child(3) { animation-delay:0.04s; }
+.confirm-card:nth-child(4) { animation-delay:0.08s; }
+.confirm-card:nth-child(5) { animation-delay:0.12s; }
+@keyframes slideUp2 { from { transform:translateY(100%); } to { transform:translateY(0); } }
+
+/* 环形图图例 */
+.donut-legend { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12px; }
+.d-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+.d-name { flex:1; color:var(--text); }
+.d-pct { color:var(--text3); font-weight:500; }
+
+/* 账本切换器 */
+.ledger-switcher { display:flex; align-items:center; gap:4px; padding:2px 0 6px 20px; }
+.ledger-current { font-size:11px; color:var(--text2); background:var(--card); padding:4px 10px; border-radius:14px; cursor:pointer; border:0.5px solid #eee; display:inline-flex; align-items:center; gap:4px; }
+.ledger-current .arrow-down { font-size:10px; color:var(--text3); }
+.ledger-badge { font-size:10px; padding:1px 6px; border-radius:6px; margin-left:4px; }
+.ledger-badge.shared { background:var(--green-light); color:#3B6D11; }
+.ledger-list { background:var(--card); border-radius:var(--radius); margin:0 16px 12px; padding:8px 0; }
+.ledger-item { padding:14px 20px; display:flex; align-items:center; gap:10px; cursor:pointer; font-size:13px; }
+.ledger-item:not(:last-child) { border-bottom:0.5px solid #f5f5f5; }
+.ledger-item .li-icon { font-size:18px; width:24px; text-align:center; }
+.ledger-item .li-name { flex:1; font-weight:500; }
+.ledger-item .li-count { font-size:11px; color:var(--text3); }
+.ledger-item.active .li-name { color:var(--orange); }
+.ledger-item .check { color:var(--orange); font-size:16px; }
+
+/* 报表范围切换 */
+.report-scope { display:flex; margin:0 16px 16px; background:#eee; border-radius:10px; padding:3px; }
+.scope-opt { flex:1; text-align:center; padding:8px; font-size:13px; font-weight:500; color:var(--text3); border-radius:8px; cursor:pointer; transition:all 0.2s; }
+.scope-opt.active { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+
+/* 时间维度栏 */
+.time-bar { padding:0 16px 16px; }
+.time-presets { display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
+.tp-opt { padding:6px 14px; border-radius:16px; font-size:13px; cursor:pointer; color:var(--text2); background:var(--card); border:0.5px solid #eee; white-space:nowrap; transition:all 0.15s; }
+.tp-opt.active { background:var(--orange); color:#fff; border-color:var(--orange); }
+.tp-opt.tp-custom { color:var(--orange); border-style:dashed; background:transparent; }
+.tp-opt.tp-custom.active { background:var(--orange); color:#fff; border-style:solid; }
+.time-range-label { font-size:11px; color:var(--text3); padding-left:4px; }
+
+/* 自定义区间弹窗 */
+.range-modal { padding:24px; }
+.range-row { display:flex; gap:12px; align-items:center; margin-bottom:16px; }
+.range-row label { font-size:13px; color:var(--text2); width:40px; flex-shrink:0; }
+.range-row input { flex:1; padding:10px 12px; border:0.5px solid #e0e0e0; border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
+.range-row input:focus { border-color:var(--orange); }
+.range-row .sep { color:var(--text3); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <!-- 导航 -->
+  <div class="nav">
+    <div class="nav-title">花马<span>记</span></div>
+    <div></div>
+  </div>
+
+  <!-- 账本切换 -->
+  <div class="ledger-switcher">
+    <span class="ledger-current" id="ledgerBtn">
+      📒 日常账本 <span class="arrow-down">▾</span>
+    </span>
+  </div>
+
+  <!-- ========== 页面容器 ========== -->
+  <div class="pages" id="pages">
+
+    <!-- 页1：记账 -->
+    <div class="page active" id="page-home">
+      <!-- 预算卡片 -->
+      <div class="budget-card">
+        <div class="budget-top">
+          <span class="budget-label">6月预算</span>
+          <span class="budget-period">还剩 5 天</span>
+        </div>
+        <div class="budget-amounts">
+          <span class="budget-spent">4,280</span>
+          <span class="budget-divider">/</span>
+          <span class="budget-total">8,000</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-fill warning" style="width:53.5%"></div>
+        </div>
+        <div class="budget-remaining">剩余 3,720</div>
+      </div>
+
+      <!-- 输入区 -->
+      <div class="input-area">
+        <div class="input-row">
+          <div class="input-icon">🐴</div>
+          <input class="input-field" type="text" placeholder="记一笔：午饭32，地铁4块，用微信" id="demoInput">
+        </div>
+        <div class="input-hint">
+          <span>午饭32</span><span>地铁4块</span><span>超市3.5</span> 一句话记多笔
+        </div>
+      </div>
+
+      <!-- 快捷账户 -->
+      <div class="account-chips">
+        <span class="account-chip active" data-acc="wechat"><span class="account-dot"></span>微信</span>
+        <span class="account-chip" data-acc="alipay"><span class="account-dot"></span>支付宝</span>
+        <span class="account-chip" data-acc="shared"><span class="account-dot shared"></span>小荷包</span>
+      </div>
+
+      <!-- AI解析结果 -->
+      <div class="confirm-section" id="confirmSection">
+        <div class="confirm-header">
+          <span class="cm-label">解析结果</span>
+          <span class="cm-count">3 笔</span>
+        </div>
+        <div class="confirm-card">
+          <div class="cm-top"><span class="cm-desc">午饭</span><span class="cm-amount">-32</span></div>
+          <div class="cm-meta"><span class="tag tag-cat">餐饮</span><span class="tag tag-acc">微信</span><span class="tag tag-date">6月25日</span></div>
+        </div>
+        <div class="confirm-card">
+          <div class="cm-top"><span class="cm-desc">地铁</span><span class="cm-amount">-4</span></div>
+          <div class="cm-meta"><span class="tag tag-cat">交通</span><span class="tag tag-acc">微信</span><span class="tag tag-date">6月25日</span></div>
+        </div>
+        <div class="confirm-card">
+          <div class="cm-top"><span class="cm-desc">超市买水</span><span class="cm-amount">-3.5</span></div>
+          <div class="cm-meta"><span class="tag tag-cat">购物</span><span class="tag tag-acc">微信</span><span class="tag tag-date">6月25日</span></div>
+        </div>
+        <button class="confirm-btn" id="confirmBtn">一键入账 · 3笔</button>
+      </div>
+
+      <!-- 最近记录 -->
+      <div class="section-label">今天</div>
+      <div class="card record-card">
+        <div class="record-icon food">🍜</div>
+        <div class="record-info">
+          <div class="record-desc">公司食堂 <span class="record-badge personal">个人</span></div>
+          <div class="record-meta">餐饮 · 微信 · 12:30</div>
+        </div>
+        <div class="record-amount">-18</div>
+      </div>
+      <div class="card record-card">
+        <div class="record-icon transport">🚇</div>
+        <div class="record-info">
+          <div class="record-desc">早班地铁 <span class="record-badge personal">个人</span></div>
+          <div class="record-meta">交通 · 支付宝 · 08:15</div>
+        </div>
+        <div class="record-amount">-5</div>
+      </div>
+      <div class="card record-card">
+        <div class="record-icon shopping">🛒</div>
+        <div class="record-info">
+          <div class="record-desc">超市日用品 <span class="record-badge shared">共同</span></div>
+          <div class="record-meta">购物 · 小荷包 · 19:20</div>
+        </div>
+        <div class="record-amount" style="color:#1D9E75">-89</div>
+      </div>
+      <div class="section-label">昨天 · 6月24日</div>
+      <div class="card record-card">
+        <div class="record-icon food">☕</div>
+        <div class="record-info">
+          <div class="record-desc">瑞幸拿铁 <span class="record-badge personal">个人</span></div>
+          <div class="record-meta">餐饮 · 微信 · 09:00</div>
+        </div>
+        <div class="record-amount">-9.9</div>
+      </div>
+    </div>
+
+    <!-- 页2：账户 -->
+    <div class="page" id="page-accounts">
+      <div class="section-label">我的账本</div>
+      <div class="ledger-list" id="ledgerList">
+        <div class="ledger-item active" data-ledger="daily">
+          <span class="li-icon">📒</span><span class="li-name">日常账本</span><span class="li-count">126笔</span><span class="check">✓</span>
+        </div>
+        <div class="ledger-item" data-ledger="tokyo">
+          <span class="li-icon">🗾</span><span class="li-name">东京旅行 <span class="ledger-badge shared">共同</span></span><span class="li-count">38笔</span>
+        </div>
+        <div class="ledger-item" data-ledger="wedding">
+          <span class="li-icon">💒</span><span class="li-name">婚礼筹备 <span class="ledger-badge shared">共同</span></span><span class="li-count">12笔</span>
+        </div>
+      </div>
+      <button class="add-acct" id="addLedgerBtn" style="margin-top:0;">+ 新建账本</button>
+      <div class="section-label">个人账户</div>
+      <div class="card acct-card">
+        <div class="acct-avatar wechat">💬</div>
+        <div class="acct-info">
+          <div class="acct-name">微信</div>
+          <div class="acct-type">个人账户</div>
+        </div>
+        <div class="acct-balance">
+          <div class="amount">2,350</div>
+          <div class="label">余额</div>
+        </div>
+        <div class="acct-arrow">›</div>
+      </div>
+      <div class="card acct-card">
+        <div class="acct-avatar alipay">💰</div>
+        <div class="acct-info">
+          <div class="acct-name">支付宝</div>
+          <div class="acct-type">个人账户</div>
+        </div>
+        <div class="acct-balance">
+          <div class="amount">5,120</div>
+          <div class="label">余额</div>
+        </div>
+        <div class="acct-arrow">›</div>
+      </div>
+      <div class="card acct-card">
+        <div class="acct-avatar cash">💵</div>
+        <div class="acct-info">
+          <div class="acct-name">现金</div>
+          <div class="acct-type">个人账户</div>
+        </div>
+        <div class="acct-balance">
+          <div class="amount">800</div>
+          <div class="label">余额</div>
+        </div>
+        <div class="acct-arrow">›</div>
+      </div>
+
+      <div class="section-label" style="margin-top:4px;">共同账户</div>
+      <div class="card acct-card">
+        <div class="acct-avatar shared-acc">💚</div>
+        <div class="acct-info">
+          <div class="acct-name">支付宝小荷包</div>
+          <div class="acct-type">共同账户 · 两人可见</div>
+        </div>
+        <div class="acct-balance">
+          <div class="amount">3,020</div>
+          <div class="label">余额</div>
+        </div>
+        <div class="acct-arrow">›</div>
+      </div>
+
+      <button class="add-acct" id="addAcctBtn">+ 添加账户</button>
+
+      <div class="section-label" style="margin-top:8px;">情侣绑定</div>
+      <div class="invite-card">
+        <div style="font-size:14px;font-weight:600;">邀请另一半一起记账</div>
+        <div class="invite-code">A7K2X9</div>
+        <div class="invite-hint">让对方输入此邀请码即可绑定</div>
+      </div>
+    </div>
+
+    <!-- 页3：报表 -->
+    <div class="page" id="page-reports">
+      <!-- 时间维度 -->
+      <div class="time-bar">
+        <div class="time-presets" id="timePresets">
+          <span class="tp-opt" data-period="today">今天</span>
+          <span class="tp-opt" data-period="month">当月</span>
+          <span class="tp-opt" data-period="quarter">当季</span>
+          <span class="tp-opt active" data-period="year">全年</span>
+          <span class="tp-opt tp-custom" id="customRangeBtn">自定义 ›</span>
+        </div>
+        <div class="time-range-label" id="timeLabel">2026年1月 - 6月</div>
+      </div>
+
+      <!-- 范围切换 -->
+      <div class="report-scope" id="reportScope">
+        <span class="scope-opt active" data-scope="current">当前账本</span>
+        <span class="scope-opt" data-scope="all">全部账本</span>
+      </div>
+
+      <!-- 数据区（动态切换） -->
+      <div class="summary-cards" id="summaryCards">
+        <div class="summary-card"><div class="s-amount expense">4,280</div><div class="s-label">本月支出</div></div>
+        <div class="summary-card"><div class="s-amount income">12,500</div><div class="s-label">本月收入</div></div>
+        <div class="summary-card"><div class="s-amount">8,220</div><div class="s-label">本月结余</div></div>
+      </div>
+
+      <!-- 环形图 -->
+      <div class="card" style="display:flex;align-items:center;gap:24px;padding:20px;" id="donutCard">
+        <div style="position:relative;width:140px;height:140px;flex-shrink:0;" id="donutWrap">
+        </div>
+        <div style="flex:1;min-width:0;" id="donutLegend">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== 底部 Tab ========== -->
+  <div class="tab-bar" id="tabBar">
+    <div class="tab-item active" data-page="home">
+      <span class="icon">📝</span>
+      <span class="label">记账</span>
+    </div>
+    <div class="tab-item" data-page="accounts">
+      <span class="icon">💳</span>
+      <span class="label">账户</span>
+    </div>
+    <div class="tab-item" data-page="reports">
+      <span class="icon">📊</span>
+      <span class="label">报表</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========== 添加账户弹窗 ========== -->
+<div class="modal-mask" id="modalAddAcct" style="display:none;">
+  <div class="modal-sheet">
+    <div class="modal-title">新建账户</div>
+    <div class="modal-field">
+      <label>账户名称</label>
+      <input type="text" placeholder="如：信用卡、储蓄卡" id="acctName">
+    </div>
+    <div class="modal-field">
+      <label>当前余额</label>
+      <input type="number" placeholder="0" id="acctBalance">
+    </div>
+    <div class="modal-field">
+      <label>账户类型</label>
+      <div class="modal-type-row">
+        <div class="modal-type-opt active" data-type="personal">个人</div>
+        <div class="modal-type-opt" data-type="shared">共同</div>
+      </div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn-cancel" id="modalCancel">取消</button>
+      <button class="modal-btn-ok" id="modalOk">确定</button>
+  </div>
+</div>
+
+<!-- ========== 自定义区间弹窗 ========== -->
+<div class="modal-mask" id="modalCustomRange" style="display:none;">
+  <div class="modal-sheet range-modal">
+    <div class="modal-title">选择时间区间</div>
+    <div class="range-row">
+      <label>从</label>
+      <input type="date" id="rangeFrom" value="2026-03-01">
+    </div>
+    <div class="range-row">
+      <label>到</label>
+      <input type="date" id="rangeTo" value="2026-06-25">
+    </div>
+    <div class="modal-btn-row" style="margin-top:8px;">
+      <button class="modal-btn-cancel" id="rangeCancel">取消</button>
+      <button class="modal-btn-ok" id="rangeOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Tab 切换 =====
+document.querySelectorAll('.tab-item').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    const pageId = 'page-' + this.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.getElementById('pages').scrollTop = 0;
+  });
+});
+
+// ===== 快捷账户切换 =====
+document.querySelectorAll('.account-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.account-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ===== 确认入账动画 =====
+document.getElementById('confirmBtn').addEventListener('click', function() {
+  this.textContent = '已入账 ✓';
+  this.disabled = true;
+  this.style.background = '#1D9E75';
+  setTimeout(() => {
+    document.getElementById('confirmSection').style.display = 'none';
+  }, 500);
+});
+
+// ===== 输入框演示 =====
+document.getElementById('demoInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    this.value = '午饭32，地铁4块，超市买水3.5，用微信';
+    this.blur();
+  }
+});
+
+// ===== 账本切换 =====
+document.getElementById('ledgerBtn').addEventListener('click', function() {
+  // 切换到账户页的账本列表
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab-item[data-page="accounts"]').classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-accounts').classList.add('active');
+  document.getElementById('pages').scrollTop = 0;
+});
+document.querySelectorAll('.ledger-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.ledger-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    const name = this.querySelector('.li-name').textContent.replace(/共同/g,'').trim();
+    document.getElementById('ledgerBtn').innerHTML = '📒 ' + name + ' <span class="arrow-down">▾</span>';
+    // 切回记账页
+    setTimeout(() => {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.querySelector('.tab-item[data-page="home"]').classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-home').classList.add('active');
+    }, 300);
+  });
+});
+document.getElementById('addLedgerBtn').addEventListener('click', function() {
+  const name = prompt('新账本名称（如：三亚度假）');
+  if (name) {
+    const type = confirm('这是共同账本吗？（确定=共同，取消=个人）');
+    const badge = type ? ' <span class="ledger-badge shared">共同</span>' : '';
+    const template = document.createElement('div');
+    template.innerHTML = `<div class="ledger-item" data-ledger="new"><span class="li-icon">📒</span><span class="li-name">${name}${badge}</span><span class="li-count">0笔</span></div>`;
+    const item = template.firstChild;
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.ledger-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById('ledgerBtn').innerHTML = '📒 ' + name + ' <span class="arrow-down">▾</span>';
+    });
+    document.getElementById('ledgerList').appendChild(item);
+    alert('账本「' + name + '」创建成功！');
+  }
+});
+document.getElementById('addAcctBtn').addEventListener('click', function() {
+  document.getElementById('modalAddAcct').style.display = 'flex';
+});
+document.getElementById('modalCancel').addEventListener('click', function() {
+  document.getElementById('modalAddAcct').style.display = 'none';
+});
+document.getElementById('modalAddAcct').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+document.getElementById('modalOk').addEventListener('click', function() {
+  document.getElementById('modalAddAcct').style.display = 'none';
+  alert('账户已创建（演示）');
+});
+document.querySelectorAll('.modal-type-opt').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.modal-type-opt').forEach(o => o.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ===== 报表：范围切换 + 环形图 =====
+var donutData = {
+  current: {
+    total:4280, income:12500, balance:8220,
+    cats:[
+      { name:'餐饮', pct:39, color:'#D85A30' },
+      { name:'购物', pct:26, color:'#EF9F27' },
+      { name:'交通', pct:15, color:'#185FA5' },
+      { name:'娱乐', pct:10, color:'#7F77DD' },
+      { name:'其他', pct:10, color:'#888780' }
+    ]
+  },
+  all: {
+    total:9860, income:24500, balance:14640,
+    cats:[
+      { name:'餐饮', pct:28, color:'#D85A30' },
+      { name:'购物', pct:22, color:'#EF9F27' },
+      { name:'交通', pct:12, color:'#185FA5' },
+      { name:'旅行', pct:20, color:'#1D9E75' },
+      { name:'娱乐', pct:10, color:'#7F77DD' },
+      { name:'其他', pct:8, color:'#888780' }
+    ]
+  }
+};
+
+function renderDonut(scope) {
+  var d = donutData[scope], total = d.total, cats = d.cats;
+  var circum = 2 * Math.PI * 50, offset = 0, circles = '';
+  cats.forEach(function(c) {
+    var len = (c.pct / 100) * circum;
+    circles += '<circle cx="70" cy="70" r="50" fill="none" stroke="' + c.color + '" stroke-width="20" stroke-dasharray="' + len.toFixed(1) + ' ' + (circum - len).toFixed(1) + '" stroke-dashoffset="' + (-offset.toFixed(1)) + '" transform="rotate(-90 70 70)" style="transition:all 0.6s"/>';
+    offset += len;
+  });
+  document.getElementById('donutWrap').innerHTML = '<svg viewBox="0 0 140 140" width="140" height="140"><circle cx="70" cy="70" r="50" fill="none" stroke="#f0f0f0" stroke-width="20"/>' + circles + '</svg><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--text);">' + total.toLocaleString() + '</div><div style="font-size:10px;color:var(--text3);">支出</div></div>';
+  var legend = '';
+  cats.forEach(function(c) {
+    legend += '<div class="donut-legend"><span class="d-dot" style="background:' + c.color + '"></span><span class="d-name">' + c.name + '</span><span class="d-pct">' + c.pct + '%</span></div>';
+  });
+  document.getElementById('donutLegend').innerHTML = legend;
+  document.getElementById('summaryCards').innerHTML =
+    '<div class="summary-card"><div class="s-amount expense">' + total.toLocaleString() + '</div><div class="s-label">本月支出</div></div>' +
+    '<div class="summary-card"><div class="s-amount income">' + d.income.toLocaleString() + '</div><div class="s-label">本月收入</div></div>' +
+    '<div class="summary-card"><div class="s-amount">' + d.balance.toLocaleString() + '</div><div class="s-label">本月结余</div></div>';
+}
+
+document.querySelectorAll('.scope-opt').forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.scope-opt').forEach(function(o) { o.classList.remove('active'); });
+    this.classList.add('active');
+    renderDonut(this.dataset.scope);
+  });
+});
+renderDonut('current');
+
+// ===== 时间维度切换 =====
+var timeData = {
+  today: { label:'2026年6月25日', expense:180, income:500, balance:320, cats:[{name:'餐饮',pct:55,color:'#D85A30'},{name:'交通',pct:25,color:'#185FA5'},{name:'购物',pct:20,color:'#EF9F27'}] },
+  month: { label:'2026年6月', expense:4280, income:12500, balance:8220, cats:[{name:'餐饮',pct:39,color:'#D85A30'},{name:'购物',pct:26,color:'#EF9F27'},{name:'交通',pct:15,color:'#185FA5'},{name:'娱乐',pct:10,color:'#7F77DD'},{name:'其他',pct:10,color:'#888780'}] },
+  quarter: { label:'2026年Q2（4-6月）', expense:12400, income:36000, balance:23600, cats:[{name:'餐饮',pct:32,color:'#D85A30'},{name:'购物',pct:28,color:'#EF9F27'},{name:'交通',pct:18,color:'#185FA5'},{name:'旅行',pct:12,color:'#1D9E75'},{name:'娱乐',pct:10,color:'#7F77DD'}] },
+  year: { label:'2026年1月 - 6月', expense:26800, income:72000, balance:45200, cats:[{name:'餐饮',pct:30,color:'#D85A30'},{name:'购物',pct:25,color:'#EF9F27'},{name:'交通',pct:15,color:'#185FA5'},{name:'旅行',pct:14,color:'#1D9E75'},{name:'娱乐',pct:9,color:'#7F77DD'},{name:'其他',pct:7,color:'#888780'}] }
+};
+
+function updateReport(period) {
+  var d = timeData[period];
+  donutData.current = { total:d.expense, income:d.income, balance:d.balance, cats:d.cats };
+  renderDonut('current');
+  document.getElementById('timeLabel').textContent = d.label;
+}
+
+document.querySelectorAll('.tp-opt').forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    if (this.id === 'customRangeBtn') {
+      document.getElementById('modalCustomRange').style.display = 'flex';
+      return;
+    }
+    document.querySelectorAll('.tp-opt').forEach(function(o) { o.classList.remove('active'); });
+    this.classList.add('active');
+    updateReport(this.dataset.period);
+  });
+});
+
+document.getElementById('rangeCancel').addEventListener('click', function() {
+  document.getElementById('modalCustomRange').style.display = 'none';
+});
+document.getElementById('rangeOk').addEventListener('click', function() {
+  var from = document.getElementById('rangeFrom').value || '2026-03-01';
+  var to = document.getElementById('rangeTo').value || '2026-06-25';
+  document.querySelectorAll('.tp-opt').forEach(function(o) { o.classList.remove('active'); });
+  document.getElementById('customRangeBtn').classList.add('active');
+  document.getElementById('timeLabel').textContent = from + ' - ' + to;
+  donutData.current = { total:8900, income:21000, balance:12100, cats:[{name:'餐饮',pct:34,color:'#D85A30'},{name:'购物',pct:24,color:'#EF9F27'},{name:'交通',pct:16,color:'#185FA5'},{name:'旅行',pct:14,color:'#1D9E75'},{name:'娱乐',pct:12,color:'#7F77DD'}] };
+  renderDonut('current');
+  document.getElementById('modalCustomRange').style.display = 'none';
+});
+document.getElementById('modalCustomRange').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+</script>
+
+</body>
+</html>
